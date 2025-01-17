@@ -11,7 +11,6 @@ import {
   TimeScale,
 } from 'chart.js';
 import 'chartjs-adapter-date-fns';
-import styles from './Charts.module.css';
 
 ChartJS.register(
   CategoryScale,
@@ -69,9 +68,11 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({ data }) => {
   };
 
   return (
-    <div className={styles['chart-container']}>
-      <h2 className={styles['section-title']}>Weekly User Registrations</h2>
-      <div className={styles['chart-wrapper']}>
+    <div className="bg-white rounded-xl p-5 shadow-sm hover:shadow-lg transition-all duration-200 flex flex-col">
+      <h2 className="text-gray-600 text-lg font-medium mb-5 pb-2.5 border-b border-gray-100">
+        Weekly User Registrations
+      </h2>
+      <div className="w-full relative flex-grow">
         <Bar data={chartData} options={options} />
       </div>
     </div>

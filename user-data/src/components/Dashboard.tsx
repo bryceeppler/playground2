@@ -2,7 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { DailyChart } from './DailyChart';
 import { WeeklyChart } from './WeeklyChart';
 import { MonthlyChart } from './MonthlyChart';
-import styles from './Charts.module.css';
+import { SearchQueriesChart } from './SearchQueriesChart';
+import { BuyButtonChart } from './BuyButtonChart';
+import { ActiveUsersChart } from './ActiveUsersChart';
 
 interface DailyData {
   date: string;
@@ -20,15 +22,24 @@ interface MonthlyData {
   projected: number;
 }
 
+interface MetricData {
+  date: string;
+  count: number;
+}
+
 export const Dashboard: React.FC = () => {
   const [dailyData, setDailyData] = useState<DailyData[]>([]);
   const [weeklyData, setWeeklyData] = useState<WeeklyData[]>([]);
   const [monthlyData, setMonthlyData] = useState<MonthlyData[]>([]);
+  const [searchQueries, setSearchQueries] = useState<MetricData[]>([]);
+  const [buyButtonClicks, setBuyButtonClicks] = useState<MetricData[]>([]);
+  const [activeUsers, setActiveUsers] = useState<MetricData[]>([]);
 
   useEffect(() => {
     // Load and process data
     const processData = async () => {
       try {
+        // Load user registration data
         const response = await fetch('/users_db.csv');
         const csvText = await response.text();
         const rows = csvText.split('\n').slice(1); // Skip header
@@ -89,6 +100,42 @@ export const Dashboard: React.FC = () => {
           };
         });
         setMonthlyData(monthly);
+
+        // Load GA4 metrics
+        const [searchQueriesResponse, buyButtonResponse, activeUsersResponse] = await Promise.all([
+          fetch('/search_queries.csv'),
+          fetch('/buy_button_clicks.csv'),
+          fetch('/active_users.csv')
+        ]);
+
+        const searchQueriesText = await searchQueriesResponse.text();
+        const buyButtonText = await buyButtonResponse.text();
+        const activeUsersText = await activeUsersResponse.text();
+
+        // Process search queries
+        const searchQueriesRows = searchQueriesText.split('\n').slice(1);
+        const searchQueriesData = searchQueriesRows.map(row => {
+          const [date, count] = row.split(',');
+          return { date, count: parseInt(count, 10) };
+        }).filter(item => !isNaN(item.count));
+        setSearchQueries(searchQueriesData);
+
+        // Process buy button clicks
+        const buyButtonRows = buyButtonText.split('\n').slice(1);
+        const buyButtonData = buyButtonRows.map(row => {
+          const [date, count] = row.split(',');
+          return { date, count: parseInt(count, 10) };
+        }).filter(item => !isNaN(item.count));
+        setBuyButtonClicks(buyButtonData);
+
+        // Process active users
+        const activeUsersRows = activeUsersText.split('\n').slice(1);
+        const activeUsersData = activeUsersRows.map(row => {
+          const [date, count] = row.split(',');
+          return { date, count: parseInt(count, 10) };
+        }).filter(item => !isNaN(item.count));
+        setActiveUsers(activeUsersData);
+
       } catch (error) {
         console.error('Error loading data:', error);
       }
@@ -98,12 +145,17 @@ export const Dashboard: React.FC = () => {
   }, []);
 
   return (
-    <div className={styles.container}>
-      <h1 className={styles['dashboard-title']}>User Registration Dashboard</h1>
-      <div className={styles['charts-grid']}>
+    <div className="w-[95%] max-w-[1600px] mx-auto my-5 p-5">
+      <h1 className="text-center text-2xl font-semibold text-gray-800 mb-10">
+        Analytics Dashboard
+      </h1>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mx-auto">
         <DailyChart data={dailyData} />
         <WeeklyChart data={weeklyData} />
         <MonthlyChart data={monthlyData} />
+        <SearchQueriesChart data={searchQueries} />
+        <BuyButtonChart data={buyButtonClicks} />
+        <ActiveUsersChart data={activeUsers} />
       </div>
     </div>
   );
