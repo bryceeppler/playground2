@@ -5,6 +5,9 @@ import { MonthlyChart } from './MonthlyChart';
 import { SearchQueriesChart } from './SearchQueriesChart';
 import { BuyButtonChart } from './BuyButtonChart';
 import { ActiveUsersChart } from './ActiveUsersChart';
+import { CombinedMetricsChart } from './CombinedMetricsChart';
+import { UserEngagementChart } from './UserEngagementChart';
+import { MonthlyGrowthChart } from './MonthlyGrowthChart';
 
 interface DailyData {
   date: string;
@@ -150,7 +153,25 @@ export const Dashboard: React.FC = () => {
         Analytics Dashboard
       </h1>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mx-auto">
-        <DailyChart data={dailyData} />
+      <DailyChart data={dailyData} />
+
+        <CombinedMetricsChart 
+          searchQueries={searchQueries}
+          buyButtonClicks={buyButtonClicks}
+          activeUsers={activeUsers}
+        />
+
+        <MonthlyGrowthChart
+          searchQueries={searchQueries}
+          buyButtonClicks={buyButtonClicks}
+          activeUsers={activeUsers}
+          newUsers={dailyData.map(d => ({ date: d.date, count: d.value }))}
+        />
+        <UserEngagementChart
+          searchQueries={searchQueries}
+          buyButtonClicks={buyButtonClicks}
+          activeUsers={activeUsers}
+        />
         <WeeklyChart data={weeklyData} />
         <MonthlyChart data={monthlyData} />
         <SearchQueriesChart data={searchQueries} />
